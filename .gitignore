@@ -5,13 +5,9 @@
 /.pnp
 .pnp.js
 .yarn/install-state.gz
-/package-lock.json
 .prettierignore
-/components.json
-/postcss.config.js
 .prettierrc.json
-/tailwind.config.ts
-/tsconfig.json
+
 
 
 # testing
