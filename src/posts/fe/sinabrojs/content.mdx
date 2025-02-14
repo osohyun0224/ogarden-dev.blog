@@ -10,7 +10,9 @@ thumbnail: /posts/fe/sinabrojs/image.png
 먼저, 웹 서버가 정적 파일을 제공하는 방식과 번들러의 역할에 대해 알아보겠습니다.
 </Callout>
 
-### 웹 서버와 HTML, CSS, JavaScript 파일의 제공
+## 웹 서버
+
+> 웹 서버와 HTML, CSS, JavaScript 파일의 제공
 
 웹 서버는 인터넷을 통해 사용자의 브라우저에 웹 페이지를 전달하는 역할을 한다. 기본적으로 웹 서버는 HTML, CSS, JavaScript 등의 정적 파일을 저장하며, 사용자가 웹사이트를 방문할 때 이 파일들을 제공한다.
 
@@ -176,7 +178,6 @@ document.addEventListener('keyup', function(event) {
 innerHTML, 이제 이벤트 리스너를 추가하는 방법에 대해 알아보겠습니다.
 </Callout>
 
-# [2] DomAPI - 2 innerHTML의 비효율성과 그 대안들
 
 웹 개발에서 DOM을 조작하는 건 자주 일어나는뎅, 그 중에서도 `innerHTML` 속성을 사용하여 요소의 HTML을 쉽게 변경할 수 있지만, innerHTML은 몇가지 비효율적인 부분이 있다고 해서 정리해보게 되었습니다. 이 글에서는 `innerHTML`의 작동 방식과 그 한계, 대안점을 함께 공부해보려 합니다.
 
@@ -199,6 +200,21 @@ document.querySelector('#app').innerHTML = '<p>Updated content</p>';
     
 3. **상태 손실**: 기존 요소를 새 요소로 완전히 교체하면, 이전 요소의 모든 상태(예: 입력 필드의 값, 포커스 상태)가 손실됩니다. 예를 들어, 사용자가 입력 필드에 데이터를 입력하는 동안 `innerHTML`이 실행되면 입력 중이던 데이터와 포커스가 모두 사라집니다.
     
+
+#### 효율적인 대안
+
+이러한 문제를 해결하기 위해 다른 DOM 조작 방법들이 있습니다.
+
+1. **`textContent`와 `innerText`**: 단순 텍스트 내용만 변경해야 할 경우, `textContent` 또는 `innerText` 속성을 사용하면 불필요한 HTML 파싱 과정을 거치지 않아도 됩니다.
+    
+2. **`createElement`와 `appendChild`**: 새 요소를 추가할 때는 `createElement`로 요소를 만든 후 `appendChild`를 사용하여 DOM에 추가하는 방법이 효율적입니다. 이건 기존의 DOM 구조를 유지하면서 새 요소만 추가하므로, 전체를 다시 로드할 필요가 없습니다.
+    
+3. **프레임워크 사용**: React나 Vue 같은 현대적인 프론트엔드 프레임워크는 DOM을 효율적으로 조작하는 자체 메커니즘을 제공합니다. 예를 들어, React는 가상 DOM을 사용하여 변경이 필요한 부분만 실제 DOM에 반영합니다.
+    
+
+#### 결론
+
+`innerHTML`은 특정 상황에서 유용할 수 있지만, 큰 규모의 어플리케이션 또는 동적인 요소가 많은 인터랙티브 웹 페이지에서는 그 한계가 명확합니다. 효율적인 DOM 조작을 위해서는 `innerHTML`의 대안을 적극적으로 고려하고, 가능한 경우 현대적인 프론트엔드 프레임워크를 활용하는 것이 좋을 것 같습니다.
 
 # [chapter 5] DomAPI - 3 대량의 이벤트 처리
 
