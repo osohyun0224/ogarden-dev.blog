@@ -25,9 +25,9 @@ export default function Giscus() {
 
     scriptElem.setAttribute('data-repo', repoName);
     scriptElem.setAttribute('data-repo-id', repoId);
-    scriptElem.setAttribute('data-category', 'Comments');
+    scriptElem.setAttribute('data-category', 'Announcements');
     scriptElem.setAttribute('data-category-id', categoryId);
-    scriptElem.setAttribute('data-mapping', 'pathname');
+    scriptElem.setAttribute('data-mapping', 'title');
     scriptElem.setAttribute('data-strict', '0');
     scriptElem.setAttribute('data-reactions-enabled', '1');
     scriptElem.setAttribute('data-emit-metadata', '0');
