@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import Script from 'next/script';
 
 import { Toaster } from '@/components/ui/toaster';
 import { baseDomain, blogDesc, blogName, blogThumbnailURL } from '@/config/const';
@@ -35,6 +36,21 @@ export default function RootLayout({
 }>) {
   return (
     <html lang='en' className='h-full scroll-my-20 scroll-smooth' suppressHydrationWarning>
+      <head>
+        <Script
+          src="https://www.googletagmanager.com/gtag/js?id=G-NLYSEYTTTT"
+          strategy="afterInteractive"
+        />
+        <Script id="google-analytics" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+
+            gtag('config', 'G-NLYSEYTTTT');
+          `}
+        </Script>
+      </head>
       <body className='font-pretendard flex min-h-screen flex-col'>
         <ThemeProvider>
           <Header />
