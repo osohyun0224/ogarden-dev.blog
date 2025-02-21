@@ -1,0 +1,155 @@
+---
+title: '시나브로 자바스크립트 2주차 스터디'
+desc: '시나브로 자바스크립트 2주차에는 데이터 구조를 통한 접근 속도 개선에 대해 작성했습니다.'
+date: 2025-02-21
+thumbnail: /posts/fe/sinabrojs/image.png
+---
+
+안녕하세요, 웹 프론트엔드 개발자 Garden, 오소현입니다.
+최근에 친한 개발자분들과 함께 시나브로 자바스크립트 강의 스터디를 진행하게 되었어요 :)
+
+저희의 스터디 레포는 아래와 같아요!
+
+https://github.com/The-survivor-is-strong/sinabro-js
+
+<Callout type="info">
+이번 주차에는 2주차 강의를 들으면서 쇼핑몰을 구현하고, 데이터 구조를 통해 접근 속도 개선에 대해 공부해보고 이를 정리해보았습니댱
+</Callout>
+
+
+# 1. 성능 최적화의 중요성
+
+프론트엔드 개발을 하다 보면 바로 대량의 데이터를 다룰 때 성능이 느려지는 현상을 경험할 수 있게 되는데, 특히 React로 개발할 때 API에서 받아온 많은 데이터를 검색하거나 필터링 하는 경우가 많은데, 이때 사용자가 답답함을 느낄 정도로 성능이 저하되는 경우가 있답니다 😅
+
+실제 예시를 통해 살펴볼까요? 예를 들어 암호화폐 지갑 앱을 만든다고 생각해볼게요!
+
+# 2. 문제가 되는 상황 살펴보기
+
+먼저 이런 코드를 작성했다고 해볼게요:
+
+```js
+const prices = [
+  { address: '토큰1', priceInUsd: 10 },
+  { address: '토큰2', priceInUsd: 20 },
+  { address: '토큰3', priceInUsd: 15 },
+];
+
+const tokensWithBalance = [
+  { address: '토큰1', amount: 5 },
+  { address: '토큰2', amount: 10 },
+  { address: '토큰3', amount: 3 },
+];
+
+const totalUsdValue = tokensWithBalance.reduce((sum, token) => {
+  const priceData = prices.find((price) => price.address === token.address);
+  return sum + (priceData?.priceInUsd || 0) * token.amount;
+}, 0);
+
+console.log(`Total USD Value: $${totalUsdValue}`);
+```
+
+이 코드에서는 각 토큰의 총 USD 가치를 계산하기 위해 배열을 사용하고 있어요. 하지만 여기서 한 가지 문제가 있는데요! 🤔 
+
+`tokensWithBalance` 배열을 순회할 때마다 `prices` 배열에서 `find()`로 가격을 찾고 있죠? 이렇게 되면 토큰이 100개, 1000개로 늘어날 때마다 검색 시간이 점점 더 오래 걸리게 됩니다. (시간 복잡도가 O(n)이에요!)
+
+# 3. 어떻게 개선할 수 있을까요?
+
+자, 그럼 이제 이 코드를 개선해볼까요? 배열 대신 객체를 사용하면 훨씬 빠르게 데이터를 찾을 수 있어요! 
+
+```js
+// 먼저 배열을 객체로 변환해볼게요 (해시 맵 형태로!)
+const priceMap = prices.reduce((acc, { address, priceInUsd }) => {
+  acc[address] = priceInUsd;
+  return acc;
+}, {});
+
+// 이제 객체를 사용해서 빠르게 계산해볼게요
+const totalUsdValueOptimized = tokensWithBalance.reduce((sum, token) => {
+  const priceInUsd = priceMap[token.address] || 0;
+  return sum + priceInUsd * token.amount;
+}, 0);
+
+console.log(`Optimized Total USD Value: $${totalUsdValueOptimized}`);
+```
+
+어떤 점이 좋아졌을까요? 🌟
+
+1. `priceMap`이라는 객체를 만들어서 토큰 주소를 키로 사용했어요
+2. 이제 가격을 찾을 때 배열을 순회할 필요 없이 바로 `priceMap[token.address]`로 접근할 수 있어요
+3. 데이터가 아무리 많아져도 검색 속도는 거의 일정해요! (시간 복잡도 O(1))
+
+이렇게 데이터 구조를 바꾸는 것만으로도 성능이 확 좋아지는 걸 볼 수 있죠? 😊
+
+# 4. 성능 측정과 비교
+
+성능 차이를 자세히 살펴볼까요? 🤓
+
+### 4.1 시간 복잡도 분석
+| 접근 방식 | 시간 복잡도 | 설명 |
+|---------|------------|------|
+| 배열 탐색 (find) | O(n²) | 배열의 각 요소마다 다시 find로 탐색해야 해서 많이 느려져요 |
+| 객체 탐색 (priceMap) | O(n) | 처음 한 번만 객체로 변환하고, 그 후엔 바로 접근할 수 있어요! |
+
+### 4.2 실제 상황에서의 차이
+예를 들어 암호화폐 거래소에서 1000개의 토큰을 다룬다고 생각해볼까요?
+
+```js
+// 1000개의 토큰이 있다고 가정해볼게요!
+const manyTokens = Array.from({ length: 1000 }, (_, i) => ({
+  address: `토큰${i}`,
+  amount: Math.random() * 10
+}));
+
+console.time('배열 탐색');
+// 배열로 찾으면 엄청 오래 걸려요 😱
+const arrayResult = /* 이전 코드 */
+console.timeEnd('배열 탐색');
+
+console.time('객체 탐색');
+// 객체로 찾으면 훨씬 빨라요! 🚀
+const objectResult = /* 최적화된 코드 */
+console.timeEnd('객체 탐색');
+```
+
+# 5. 그럼 항상 객체가 좋을까요?
+
+꼭 그렇지만은 않고, 그냥 배열을 쓰는 게 더 좋을 수 있어요 아래에서 더 자세히 알아봅시다.
+
+1. 데이터가 적을 때 (10개 이하)
+   - 이럴 땐 객체로 변환하는 것 자체가 오히려 낭비일 수 있어요!
+   
+2. 한 두 번만 검색이 필요할 때
+   - 객체 변환에도 시간이 들어가니까요
+
+3. 순서가 중요할 때
+   - 배열은 순서를 보장하지만, 객체는 그렇지 않아요
+
+하지만 다음과 같은 경우에는 꼭 객체를 사용하는 게 좋아요!
+
+1. 실시간으로 자주 검색해야 할 때
+2. 데이터가 100개 이상으로 많을 때
+3. React에서 반복적인 렌더링이 일어날 때
+
+# 6. 실제 개발할 때 팁! 💡
+
+제가 실제로 개발하면서 얻은 팁은 다음과 같습니다.
+
+```js
+// 👎 이렇게 하면 매번 find를 실행해야 해요
+function getBadPerformance(id) {
+  return bigDataArray.find(item => item.id === id);
+}
+
+// 👍 이렇게 미리 객체로 만들어두면 좋아요!
+const dataMap = bigDataArray.reduce((acc, item) => {
+  acc[item.id] = item;
+  return acc;
+}, {});
+
+function getGoodPerformance(id) {
+  return dataMap[id];
+}
+```
+
+이렇게 데이터 구조를 잘 선택하는 것만으로도 사용자 경험을 크게 개선할 수 있어요! 특히 React로 개발할 때는 불필요한 렌더링도 줄일 수 있답니다 😊
+

@@ -10,6 +10,8 @@ import { ThemeProvider } from '@/layouts/theme/Provider';
 import { Analytics } from '@vercel/analytics/react';
 import { SpeedInsights } from '@vercel/speed-insights/next';
 
+const GA_ID = process.env.NEXT_PUBLIC_GA_ID;
+
 export const metadata: Metadata = {
   metadataBase: new URL(baseDomain),
   title: blogName,
@@ -38,7 +40,7 @@ export default function RootLayout({
     <html lang='en' className='h-full scroll-my-20 scroll-smooth' suppressHydrationWarning>
       <head>
         <Script
-          src="https://www.googletagmanager.com/gtag/js?id=G-NLYSEYTTTT"
+          src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`}
           strategy="afterInteractive"
         />
         <Script id="google-analytics" strategy="afterInteractive">
@@ -47,7 +49,7 @@ export default function RootLayout({
             function gtag(){dataLayer.push(arguments);}
             gtag('js', new Date());
 
-            gtag('config', 'G-NLYSEYTTTT');
+            gtag('config', '${GA_ID}');
           `}
         </Script>
       </head>
