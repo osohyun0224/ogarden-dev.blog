@@ -1,0 +1,190 @@
+---
+title: '프론트엔드 서버리스에 대해서 알아보기'
+desc: '프론트엔드 서버리스에 대해서 공부해보고, Vercel과 GraphQL과 서버리스의 연관성을 함께 정리해보았습니다.'
+date: 2025-02-28
+thumbnail: /posts/fe/serverless/serverless.png
+---
+
+안녕하세요, 웹 프론트엔드 개발자 Garden, 오소현입니다.
+
+# 프론트엔드 개발자가 설명해보는 서버리스(Serverless)
+
+## 서버리스가 뭘까요?
+서버리스(Serverless)라는 말을 들으면 '서버가 없다'는 뜻처럼 들리지만, 실제로는 서버를 직접 관리할 필요가 없는 아키텍처를 말해요. 클라우드 서비스 제공자가 인프라를 알아서 관리해주기 때문에, 우리는 서버 운영이나 유지보수 걱정 없이 개발과 배포에만 집중할 수 있어요!
+
+## 서버리스의 핵심 개념들을 알아볼까요?
+
+### 1. IaaS(Infrastructure as a Service)는 뭔가요?
+- 서버나 스토리지 같은 컴퓨팅 자원을 가상화해서 제공하는 서비스입니다.
+- AWS EC2나 Google Compute Engine이 대표적이예요
+- IaaS를 쓰면 직접 서버를 살 필요는 없지만, 서버 설정과 관리는 여전히 개발자가 해야합니다.
+- 💡 참고로 IaaS는 서버리스가 아니에요!
+
+### 2. FaaS(Function as a Service)는요?
+- 코드를 함수 단위로 실행하는 서버리스 방식입니다.
+- 요청이 있을 때만 함수가 실행되고, 요청이 없으면 동작하지 않아서 비용이 절약돼요.
+- AWS Lambda, Google Cloud Functions, Azure Functions 같은게 있습니다!
+- 💡 FaaS가 바로 대표적인 서버리스 기술이에요!
+
+### 3. BaaS(Backend as a Service)는 어떤 거죠?
+- 데이터베이스, 인증, 파일 저장 같은 백엔드 기능을 API로 제공하는 서비스입니다.
+- 백엔드 로직을 직접 만들 필요 없이, 클라우드 서비스로 쉽게 구현할 수 있어요.
+- Firebase, AWS Amplify, Supabase 같은 서비스들이 있습니다.
+- 💡 BaaS도 서버리스의 한 종류랍니다!
+
+# 프론트엔드 개발자가 서버리스를 어떻게 활용할 수 있을까요?
+
+## 1. 정적 웹사이트 배포하기 (Vercel, Netlify, AWS S3 + CloudFront)
+프론트엔드 앱(React, Next.js 등)을 서버리스 환경에서 쉽게 배포할 수 있어요.
+
+### ✅ Vercel과 Netlify는요
+- Next.js 배포할 때 가장 많이 쓰는 플랫폼이에요
+- 정적 페이지(SSG)랑 API 라우트(FaaS)를 한 번에 제공해줍니다.
+- 글로벌 CDN으로 콘텐츠를 빠르게 전달할 수 있습니다.
+
+### ✅ AWS S3 + CloudFront는요
+- S3에는 HTML, CSS, JS 같은 정적 파일을 저장합니다.
+- CloudFront로 전 세계 엣지 서버에 캐싱해서 빠르게 응답할 수 있어요!
+
+> 참고로 Vercel은 내부적으로 서버리스 아키텍처를 사용한답니다!
+
+## 2. 서버리스 API 만들기 (FaaS + GraphQL + 데이터베이스)
+서버리스로 API를 만들 때는 FaaS랑 GraphQL을 같이 쓰면 좋다고합니다!
+
+### ✅ AWS Lambda + API Gateway + GraphQL 조합
+- Lambda 함수로 요청이 올 때만 실행되는 API를 만들 수 있어요
+- GraphQL로 클라이언트가 필요한 데이터만 쏙쏙 골라서 요청할 수 있죠
+
+## 3. 서버리스로 GraphQL API 구성하기
+GraphQL이랑 서버리스는 찰떡궁합이에요! REST API는 여러 번 호출해야 하는데, GraphQL은 한 번에 원하는 데이터를 다 가져올 수 있습니다. 서버리스는 API 호출이 적을수록 비용이 절약되니까, GraphQL이 좋을 것 같죵???
+
+### AWS AppSync + Lambda + DynamoDB 예시
+
+```graphql
+# GraphQL 쿼리 예제
+query GetUser($id: ID!) {
+  getUser(id: $id) {
+    name
+    email
+    posts {
+      title
+      content
+    }
+  }
+}
+```
+- AWS AppSync는 GraphQL API를 관리해주는 서비스
+- Lambda는 특정 쿼리가 요청됐을 때 실행되는 서버리스 함
+- DynamoDB는 NoSQL 기반의 서버리스 데이터베이스
+
+# 서버리스의 장단점을 알아볼까요?
+
+## ✅ 좋은 점
+- 서버 관리할 필요가 없어요 → 인프라 걱정 없이 개발에만 집중!
+- 비용이 절약돼요 → 사용한 만큼만 내면 돼요 (자동으로 확장도 되고요)
+- 배포가 빨라요 → Vercel이나 AWS Lambda 같은 서비스로 쉽게 할 수 있습니다.
+- 확장성이 좋아요 → 트래픽이 늘어나도 자동으로 대응해줘요
+
+## ❌ 아쉬운 점
+- 콜드 스타트 문제가 있어요 → FaaS 함수가 처음 실행될 때 좀 느릴 수 있습니다.
+- 디버깅이 어려워요 → 서버리스 환경에서는 로컬에서 디버깅하기가 쉽지 않아요ㅠㅠ
+- 특정 서비스에 종속될 수 있어요 → 클라우드 서비스에 너무 의존하게 될 수 있죠
+
+# Vercel과 서버리스(Serverless)는 어떤 관계일까요?
+
+## 1. Vercel이 뭔가요?
+Vercel은 프론트엔드 앱을 정말 쉽고 빠르게 배포할 수 있는 서버리스 플랫폼입니다.
+ 특히 Next.js의 공식 배포 플랫폼으로 유명하고, React, Vue, Svelte 같은 다양한 프레임워크도 지원해요.
+
+### ✅ Vercel의 좋은 점들
+- 정적/동적 페이지를 모두 지원해요: Next.js의 SSG랑 SSR을 다 쓸 수 있스빈다.
+- 서버리스 함수를 지원해요: API 라우트를 자동으로 FaaS로 바꿔줘요
+- CDN을 제공해요: 전 세계 엣지 네트워크로 빠른 로딩 속도를 보장하죠
+- 자동으로 확장돼요: 트래픽이 늘어나면 서버가 알아서 늘어나요
+- 깃허브랑 연동돼요: 깃 푸시만 하면 자동으로 배포까지 해줘요
+
+## 2. Vercel은 서버리스를 어떻게 활용하나요?
+Vercel은 내부적으로 서버리스 컴퓨팅을 사용해서 앱을 배포하고 실행해요.
+
+### (1) 정적 페이지 배포 (SSG, ISR)
+- 정적 페이지는 빌드할 때 만들어서 CDN에 올립니다.
+- 사용자가 웹사이트에 접속하면 가장 가까운 CDN에서 콘텐츠를 가져옵니다.
+- AWS S3 + CloudFront 같은 글로벌 CDN 기술을 사용합니다!
+
+### (2) API 라우트
+- Next.js의 API Routes를 자동으로 서버리스 함수로 바꿔줍니다.
+- 백엔드 없이도 API를 만들 수 있어요!
+- 요청이 있을 때만 함수가 실행되니까 비용도 절약되죠 ㅎㅎ
+
+### (3) Edge Functions
+- 일반 서버리스 함수보다 더 빠른 응답을 제공해요
+- 사용자와 가장 가까운 엣지 서버에서 함수가 실행되기때문이예요!
+- Cloudflare Workers나 Vercel Edge Functions 같은 기술을 습니다.
+
+## 3. Vercel에서 서버리스를 쓰면 뭐가 좋을까요?
+
+### ✅ 서버 관리가 필요 없어요
+- 서버 설정 없이 바로 배포할 수 있어요
+- 트래픽이 늘어나도 알아서 서버가 늘어나요
+
+### ✅ 비용이 절약돼요
+- 사용한 만큼만 돈 내면 돼요
+- 무료 플랜(Hobby)도 있어요
+
+### ✅ Next.js랑 찰떡궁합이에요
+- SSG/ISR 기능으로 빌드 성능이 최적화돼요
+- API Routes로 백엔드 서버 없이도 API를 만들 수 있어요
+
+### ✅ CDN이랑 엣지 서버를 잘 활용해요
+- 전 세계 엣지 네트워크에서 최고의 속도로 서비스를 제공해요
+
+## 4. Vercel로 서버리스 아키텍처 만드는 예시를 볼까요?
+
+### (1) SSG(Static Site Generation) 사용하기
+```javascript
+// pages/index.js
+export async function getStaticProps() {
+  const res = await fetch("https://jsonplaceholder.typicode.com/posts");
+  const posts = await res.json();
+  return { props: { posts } };
+}
+```
+
+### (2) API Routes로 서버리스 함수 만들기
+```javascript
+// pages/api/data.js
+export default async function handler(req, res) {
+  const data = await fetch("https://jsonplaceholder.typicode.com/todos/1");
+  const json = await data.json();
+  res.status(200).json(json);
+}
+```
+
+### (3) Edge Functions로 빠른 응답 만들기
+```javascript
+export const config = { runtime: "edge" };
+export default async function handler(req) {
+  return new Response(JSON.stringify({ message: "Hello Edge!" }), {
+    headers: { "Content-Type": "application/json" },
+  });
+}
+```
+
+## 5. Vercel이랑 AWS Lambda는 어떻게 다를까요?
+
+| 비교할 내용 | Vercel 서버리스 함수 | AWS Lambda |
+|-----------|---------------------------|------------|
+| 처음 설정하기 | 쉬워요 (Next.js API Routes) | 설정이 좀 필요해요 |
+| 배포하는 방법 | Git Push하면 자동으로 돼요 | 수동으로 설정해야 해요 |
+| 실행 환경 | Node.js만 써요 | 여러 언어를 쓸 수 있어요 |
+| 트래픽 관리 | 알아서 확장돼요 | 설정이 필요해요 |
+| 무료로 쓸 수 있나요? | 네! | 네! (근데 제한이 있어요) |
+| 엣지에서 실행 | 가능해요 | 아직은 안 돼요 |
+
+> 💡 AWS Lambda는 더 자유롭게 쓸 수 있지만, Vercel은 프론트엔드 개발자한테 딱 맞는 배포랑 서버리스 API 환경을 제공해요!
+
+# 정리해볼까요?
+- Vercel로 서버리스 환경에서 쉽고 빠르게 배포할 수 있어요
+- Next.js의 API Routes는 Vercel이 알아서 서버리스 함수로 바꿔줘요
+- Edge Functions를 쓰면 엄청 빠른 응답이 가능해요
+- GraphQL API를 서버리스로 운영하면 비용도 아끼고 성능도 좋아져요
