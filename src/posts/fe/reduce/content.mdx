@@ -1,0 +1,476 @@
+---
+title: 'reduce 톺아보기'
+desc: '자바스크립트의 강력한 배열 메서드 reduce 함수를 자세히 정리해보았습니다!'
+date: 2025-03-07
+thumbnail: /posts/fe/sinabrojs/image.png
+---
+
+안녕하세요, 웹 프론트엔드 개발자 Garden, 오소현입니다.
+
+최근에 친한 개발자분들과 함께 시나브로 자바스크립트 강의 스터디를 진행하게 되었어요 :)
+저희의 스터디 레포는 아래와 같아요!
+
+https://github.com/The-survivor-is-strong/sinabro-js
+
+<Callout type="info">
+이번 주차에는 4주차 강의를 들으면서 Array와 비동기 처리에 대한 내용을 학습했습니다!
+그 중에서 코딩테스트를 대비할겸 reduce를 다시한번 더 정리해봤어요!
+</Callout>
+
+
+
+## JavaScript의 reduce() 함수
+
+이번 블로그 포스팅으로 `reduce()` 함수의 기본 개념부터 다양한 활용 예제까지 자세히 알아보겠습니다.
+
+### reduce() 함수란?
+
+`reduce()`는 배열의 각 요소에 대해 정의된 리듀서(reducer) 함수를 실행하고, 하나의 결과값을 반환합니다. 이 과정에서 배열의 모든 요소가 단일 값으로 "축소(reduce)"됩니다. 함수의 시그니처는 다음과 같습니다:
+
+```javascript
+array.reduce(callback[, initialValue])
+```
+
+- **callback**: 배열의 각 요소에 대해 실행할 함수로, 네 가지 인자를 받습니다.
+  - **accumulator**: 누적 계산의 결과값입니다.
+  - **currentValue**: 처리할 현재 요소의 값입니다.
+  - **currentIndex** (선택적): 처리할 현재 요소의 인덱스입니다.
+  - **array** (선택적): 원본 배열입니다.
+- **initialValue** (선택적): 누적 계산의 초기값입니다. 이 값을 제공하지 않으면 배열의 첫 번째 요소가 사용됩니다.
+
+<Callout type="info">
+`reduce()`는 배열 메서드들의 아버지라고도 불립니다. `map()`, `filter()`, `join()` 등의 기능을 모두 `reduce()`로 구현할 수 있기 때문입니다!
+</Callout>
+
+### reduce() 함수의 작동 방식
+
+`reduce()` 함수가 어떻게 동작하는지 단계별로 살펴보겠습니다.
+
+```javascript
+const numbers = [1, 2, 3, 4, 5];
+const result = numbers.reduce((acc, cur, idx) => {
+  console.log(`누적값: ${acc}, 현재값: ${cur}, 인덱스: ${idx}`);
+  return acc + cur;
+}, 0);
+
+console.log(result); // 15
+```
+
+위 코드의 실행 결과는 다음과 같습니다:
+
+```
+누적값: 0, 현재값: 1, 인덱스: 0
+누적값: 1, 현재값: 2, 인덱스: 1
+누적값: 3, 현재값: 3, 인덱스: 2
+누적값: 6, 현재값: 4, 인덱스: 3
+누적값: 10, 현재값: 5, 인덱스: 4
+15
+```
+
+### initialValue의 중요성
+
+`reduce()` 함수 호출 시 `initialValue`를 제공하는건 중요하게 고민할 점인데요, `initialValue`가 있는 경우와 없는 경우의 차이를 한번 살펴볼게요!
+
+#### initialValue가 없는 경우
+
+```javascript
+const numbers = [0, 1, 2, 3, 4];
+const result = numbers.reduce((acc, cur, idx) => {
+  console.log(`누적값: ${acc}, 현재값: ${cur}, 인덱스: ${idx}`);
+  return acc + cur;
+});
+
+console.log(result); // 10
+```
+
+출력 결과:
+```
+누적값: 0, 현재값: 1, 인덱스: 1
+누적값: 1, 현재값: 2, 인덱스: 2
+누적값: 3, 현재값: 3, 인덱스: 3
+누적값: 6, 현재값: 4, 인덱스: 4
+10
+```
+
+`initialValue`를 제공하지 않으면?
+
+> 배열의 첫 번째 요소가 초기 누적값(`acc`)으로 사용됩니다.
+>  콜백 함수는 배열의 두 번째 요소부터 실행됩니다.
+>  인덱스는 1부터 시작합니다.
+
+#### initialValue가 있는 경우
+
+```javascript
+const numbers = [0, 1, 2, 3, 4];
+const result = numbers.reduce((acc, cur, idx) => {
+  console.log(`누적값: ${acc}, 현재값: ${cur}, 인덱스: ${idx}`);
+  return acc + cur;
+}, 10);
+
+console.log(result); // 20
+```
+
+출력 결과:
+```
+누적값: 10, 현재값: 0, 인덱스: 0
+누적값: 10, 현재값: 1, 인덱스: 1
+누적값: 11, 현재값: 2, 인덱스: 2
+누적값: 13, 현재값: 3, 인덱스: 3
+누적값: 16, 현재값: 4, 인덱스: 4
+20
+```
+
+`initialValue`를 제공하면:
+> 제공한 값이 초기 누적값(`acc`)으로 사용됩니다.
+> 콜백 함수는 배열의 첫 번째 요소부터 실행됩니다.
+> 인덱스는 0부터 시작합니다.
+
+<Callout type="warning">
+빈 배열에서 `initialValue` 없이 `reduce()`를 호출하면 오류가 발생합니다. 따라서 배열이 비어있을 가능성이 있는 경우에는 항상 `initialValue`를 제공하는 것이 안전합니다.
+</Callout>
+
+### reduce()의 다양한 활용 예제
+
+`reduce()`는 단순히 배열 요소의 합을 구하는 것 외에도 다른 일에도 적용할 수 있는데요!
+
+#### 1. 배열 요소의 합 계산하기
+
+```javascript
+const numbers = [1, 2, 3, 4, 5];
+const sum = numbers.reduce((acc, num) => acc + num, 0);
+console.log(sum); // 15
+```
+
+#### 2. 배열 요소의 곱 계산하기
+
+```javascript
+const numbers = [1, 2, 3, 4, 5];
+const product = numbers.reduce((acc, num) => acc * num, 1);
+console.log(product); // 120
+```
+
+#### 3. 객체 배열에서 특정 속성의 합 구하기
+
+```javascript
+const items = [
+  { name: '사과', price: 2000, quantity: 2 },
+  { name: '바나나', price: 1500, quantity: 3 },
+  { name: '오렌지', price: 3000, quantity: 1 }
+];
+
+const totalPrice = items.reduce((total, item) => total + (item.price * item.quantity), 0);
+console.log(totalPrice); // 10500
+```
+
+#### 4. 중첩 배열 평탄화하기
+
+```javascript
+const nestedArray = [[1, 2], [3, 4], [5, 6]];
+const flatArray = nestedArray.reduce((acc, cur) => [...acc, ...cur], []);
+console.log(flatArray); // [1, 2, 3, 4, 5, 6]
+```
+
+#### 5. 배열의 중복 항목 제거하기
+
+```javascript
+const duplicates = [1, 2, 5, 2, 1, 3, 4, 3];
+const uniques = duplicates.reduce((acc, item) => {
+  return acc.includes(item) ? acc : [...acc, item];
+}, []);
+console.log(uniques); // [1, 2, 5, 3, 4]
+```
+
+#### 6. 속성으로 객체 분류하기
+
+```javascript
+const people = [
+  { name: '철수', age: 20 },
+  { name: '영희', age: 21 },
+  { name: '민수', age: 20 },
+  { name: '수진', age: 21 }
+];
+
+const groupedByAge = people.reduce((acc, person) => {
+  const key = person.age;
+  if (!acc[key]) {
+    acc[key] = [];
+  }
+  acc[key].push(person);
+  return acc;
+}, {});
+
+console.log(groupedByAge);
+/*
+{
+  '20': [
+    { name: '철수', age: 20 },
+    { name: '민수', age: 20 }
+  ],
+  '21': [
+    { name: '영희', age: 21 },
+    { name: '수진', age: 21 }
+  ]
+}
+*/
+```
+
+#### 7. map() 함수 구현하기
+
+```javascript
+const numbers = [1, 2, 3, 4, 5];
+const doubled = numbers.reduce((acc, num) => {
+  acc.push(num * 2);
+  return acc;
+}, []);
+console.log(doubled); // [2, 4, 6, 8, 10]
+```
+
+#### 8. filter() 함수 구현하기
+
+```javascript
+const numbers = [1, 2, 3, 4, 5];
+const evens = numbers.reduce((acc, num) => {
+  if (num % 2 === 0) {
+    acc.push(num);
+  }
+  return acc;
+}, []);
+console.log(evens); // [2, 4]
+```
+
+### reduceRight() 함수: 반대 방향으로 작동하는 reduce
+
+`reduceRight()`는 `reduce()`와 동일한 기능을 하지만, 배열의 오른쪽(마지막 요소)부터 왼쪽(첫 번째 요소)으로 순회합니다.
+
+```javascript
+const arr = ["경기도", "안양시", "만안구"];
+const result = arr.reduceRight((acc, element) => acc + " " + element);
+console.log(result); // "만안구 안양시 경기도"
+```
+
+이건  `Array.join(' ')`과 유사한 결과를 보여주고 있죵??
+
+### 프로미스를 순차적으로 실행하기
+
+`reduce()`를 사용하여 프로미스를 순차적으로 실행할 수 있습니다!
+
+```javascript
+function runPromiseInSequence(arr, input) {
+  return arr.reduce((acc, fn) => {
+    return acc.then(fn);
+  }, Promise.resolve(input));
+}
+
+function promise1(value) {
+  return new Promise((resolve) => {
+    console.log(`promise1 - 값: ${value}`);
+    resolve(value * 5);
+  });
+}
+
+function promise2(value) {
+  return new Promise((resolve) => {
+    console.log(`promise2 - 값: ${value}`);
+    resolve(value * 2);
+  });
+}
+
+function function3(value) {
+  console.log(`function3 - 값: ${value}`);
+  return value * 3;
+}
+
+const promiseArr = [promise1, promise2, function3];
+runPromiseInSequence(promiseArr, 10)
+  .then((result) => {
+    console.log(`최종 결과: ${result}`);
+  });
+
+/*
+promise1 - 값: 10
+promise2 - 값: 50
+function3 - 값: 100
+최종 결과: 300
+*/
+```
+
+### reduce() 사용 시 주의사항
+
+#### **초기값 제공**
+- 빈 배열에서 `reduce()`를 호출할 때는 초기값을 반드시 제공해야하고, 그렇지 않으면 오류가 발생합니다.
+
+#### **불변성 유지**
+- `reduce()` 내에서 원본 배열이나 객체를 직접 수정하지 않도록 주의해야 합니다. 불변성을 유지하면 코드의 예측 가능성과 유지 관리가 쉬워져용!
+
+#### **성능 고려**
+- 복잡한 연산이나 큰 배열에서는 성능에 영향을 줄 수 있으므로, 필요에 따라 다른 방법(`for` 루프)을 고려할 수도 있습니다
+
+#### **가독성**
+- `reduce()`는 너무 복잡한 로직을 넣으면 코드의 가독성이 떨어질 수 있다고 하는데 저는 아직 잘,, 공감은 안가는 것 같아요!
+
+# 회사 코드로 살펴보기
+
+제가 회사에서 작업했던 코드에서 `reduce()`를 어떻게 활용했는지 소개해보려하는데요! 
+구현한 컴포넌트는 인기 급상승 동영상에 대한 데이터를 다운로드하는 모달 컴포넌트인데요, 여기서 `reduce()`가 어떻게 활용되었는지 같이 보시죱!
+
+# 1. 데이터 필터링과 변환에 reduce 활용하기
+
+제가 작성한 코드에서 가장 중요한 `reduce()` 활용 부분은 CSV 다운로드 기능을 구현하는 부분입니다:
+
+```javascript
+const filteredData = data.reduce((acc, item) => {
+  if (item.Title && !item["Algorithm Score"]) {
+    currentSection = {
+      trendingShorts: "trendingShorts",
+      trendingVideos: "trendingVideos",
+      recentlyVideos: "recentlyVideos",
+    }[item.Title]
+
+    if (currentSection && selectedOptions.includes(currentSection)) {
+      acc.push(item)
+    }
+  } else if (currentSection && selectedOptions.includes(currentSection)) {
+    acc.push(
+      selectedDownloadOptions.reduce((obj, option) => {
+        const header = mapOptionToHeader(option)
+        if (item.hasOwnProperty(header)) {
+          obj[header] = item[header]
+        }
+        return obj
+      }, {})
+    )
+  }
+  return acc
+}, [])
+```
+
+이 코드에서 `reduce()`는 두 가지 목적으로 사용되었습니다:
+
+### 1) **외부 reduce**
+전체 데이터 배열을 순회하면서 사용자가 선택한 섹션(인기 급상승 Shorts, 인기 급상승 동영상, 최근 인기 동영상)에 해당하는 데이터만 필터링합니다.
+
+### 2) **내부 reduce**
+각 데이터 항목에서 사용자가 선택한 다운로드 옵션(제목, 링크, 알고리즘 스코어 등)에 해당하는 속성만 추출하여 새로운 객체를 생성합니다.
+
+이렇게 중첩된 `reduce()`를 사용함으로써 복잡한 데이터 필터링과 변환 작업을 간결하게 처리할 수 있엇어용!
+
+## 2. 기존 방식과 reduce 사용의 차이점
+
+만약 `reduce()`를 사용하지 않았다면, 이 기능을 구현하기 위해 아래와 같이 구현해야 했어요 ,, ㅠㅠ
+
+```javascript
+// reduce를 사용하지 않은 경우
+const filteredData = []
+let currentSection = null
+
+for (let i = 0; i < data.length; i++) {
+  const item = data[i]
+  
+  if (item.Title && !item["Algorithm Score"]) {
+    if (item.Title === "trendingShorts") currentSection = "trendingShorts"
+    else if (item.Title === "trendingVideos") currentSection = "trendingVideos"
+    else if (item.Title === "recentlyVideos") currentSection = "recentlyVideos"
+    
+    if (currentSection && selectedOptions.includes(currentSection)) {
+      filteredData.push(item)
+    }
+  } else if (currentSection && selectedOptions.includes(currentSection)) {
+    const newObj = {}
+    
+    for (let j = 0; j < selectedDownloadOptions.length; j++) {
+      const option = selectedDownloadOptions[j]
+      const header = mapOptionToHeader(option)
+      
+      if (item.hasOwnProperty(header)) {
+        newObj[header] = item[header]
+      }
+    }
+    
+    filteredData.push(newObj)
+  }
+}
+```
+
+중첩된 반복문들이 범벅된 이 코드와 비교했을 때, `reduce()`를 사용한 코드는 어떤 장점이 있냐면,
+
+1) 중첩된 반복문과 조건문을 사용하는 대신, 함수형 프로그래밍 방식으로 데이터를 처리하여 코드가 더 간결해졌습니다.
+
+2) 데이터 처리 로직이 더 명확하게 표현되어 코드의 의도를 이해하기 쉬워졌죵
+
+3) 데이터 처리 로직이 한 곳에 집중되어 있어, 나중에 수정이 필요할 때 더 쉽게 변경할 수 있습니다.
+
+## 3. XLSX 파일 생성에서의 reduce 활용
+
+또한 XLSX 파일을 생성하는 부분에서도 `reduce()`를 활용했습니다
+
+```javascript
+const groupedData = selectedOptions.reduce((acc, option) => {
+  acc[option] = []
+  return acc
+}, {})
+```
+
+이 코드는 사용자가 선택한 옵션에 따라 데이터를 그룹화하기 위한 초기 객체를 생성하는데요, 각 옵션을 키로 하고, 빈 배열을 값으로 가지는 객체를 만들어 데이터를 분류하는 데 사용합니다.
+
+## 4. 코드 개선하기
+
+위 코드를 더 개선하기 위해 함수를 분리하여 가독성과 재사용성을 높일 수 있겠더라고요,,그래서 아래와 같이 구현해봤습니다!
+
+```javascript
+// 데이터 필터링 함수 분리
+const filterDataBySection = (data, selectedOptions, selectedDownloadOptions) => {
+  let currentSection = null
+  
+  return data.reduce((acc, item) => {
+    if (item.Title && !item["Algorithm Score"]) {
+      currentSection = {
+        trendingShorts: "trendingShorts",
+        trendingVideos: "trendingVideos",
+        recentlyVideos: "recentlyVideos",
+      }[item.Title]
+
+      if (currentSection && selectedOptions.includes(currentSection)) {
+        acc.push(item)
+      }
+    } else if (currentSection && selectedOptions.includes(currentSection)) {
+      acc.push(extractSelectedFields(item, selectedDownloadOptions))
+    }
+    return acc
+  }, [])
+}
+
+// 필드 추출 함수 분리
+const extractSelectedFields = (item, selectedOptions) => {
+  return selectedOptions.reduce((obj, option) => {
+    const header = mapOptionToHeader(option)
+    if (item.hasOwnProperty(header)) {
+      obj[header] = item[header]
+    }
+    return obj
+  }, {})
+}
+
+// 사용 예시
+const downloadData = () => {
+  handleLimitCheck()
+
+  if (selectedFileType === "CSV") {
+    const filteredData = filterDataBySection(data, selectedOptions, selectedDownloadOptions)
+    const csvData = convertToCSV(filteredData)
+    const blob = new Blob(["\uFEFF" + csvData], { type: "text/csv;charset=utf-8" })
+    saveAs(blob, `${router.query.nations || "KR"}_Trending_${new Date().toISOString().split("T")[0]}.csv`)
+  } else {
+.. 생략할게용!
+  }
+
+  onCancel()
+  trackEvent("data_download_done")
+}
+```
+더 코드가 간결해졌죠?! 한 함수가 하나의 역할을 하고 유지보수도 더 쉬워진 코드로 개선해봤습니다
+
+## 직접 사용해보니 어떤가요?
+
+`reduce()`를 활용함으로써 복잡한 데이터 처리 로직을 더 간결하게 구현할 수 있었습니다. 특히 여러 단계의 데이터 필터링과 변환이 필요한 경우, `reduce()`는 그 유연성과 강력함으로 복잡한 로직을 간결하게 표현할 수 있게 해줬습니다!
+
+코딩 테스트에서도 잘 활용해보려 합니다 ㅎㅎ
